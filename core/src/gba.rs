@@ -27,8 +27,14 @@ pub const CONFIG: bincode::config::Configuration<
     bincode::config::Fixint,
 > = bincode::config::legacy();
 
+/// Static-recompilation hook run in place of one interpreter step. It receives the CPU and the
+/// timestamp of the next scheduler event, may execute translated code up to that deadline, and
+/// returns false to let the interpreter execute the instruction instead.
+pub type CpuRunner = fn(&mut Arm7tdmiCore<SysBus>, usize) -> bool;
+
 pub struct GameBoyAdvance {
     pub cpu: Box<Arm7tdmiCore<SysBus>>,
+    cpu_runner: Option<CpuRunner>,
     pub(crate) sysbus: Shared<SysBus>,
     pub(crate) io_devs: Shared<IoDevices>,
     pub(crate) scheduler: SharedScheduler,
@@ -109,6 +115,7 @@ impl GameBoyAdvance {
 
         let mut gba = GameBoyAdvance {
             cpu,
+            cpu_runner: None,
             sysbus,
             io_devs,
             audio_interface,
@@ -155,6 +162,7 @@ impl GameBoyAdvance {
 
         Ok(GameBoyAdvance {
             cpu: arm7tdmi,
+            cpu_runner: None,
             sysbus,
             io_devs,
             interrupt_flags: interrupts,
@@ -286,10 +294,22 @@ impl GameBoyAdvance {
         self.io_devs.haltcnt = HaltState::Running; // Clear out from low power mode
     }
 
+    /// Install (or remove) the static-recompilation runner used before each interpreter step.
+    pub fn set_cpu_runner(&mut self, runner: Option<CpuRunner>) {
+        self.cpu_runner = runner;
+    }
+
     #[inline]
     fn cpu_step(&mut self) {
         if self.io_devs.intc.irq_pending() {
             self.cpu_interrupt();
+        }
+        if let Some(run) = self.cpu_runner {
+            // Safety: `run` always schedules a RunLimitReached event before stepping.
+            let deadline = unsafe { self.scheduler.timestamp_of_next_event_unchecked() };
+            if run(&mut self.cpu, deadline) {
+                return;
+            }
         }
         self.cpu.step();
     }

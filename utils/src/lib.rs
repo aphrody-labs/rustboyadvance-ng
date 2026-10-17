@@ -9,18 +9,18 @@ use std::time;
 pub use ringbuf::traits::*;
 pub mod elf;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(all(target_arch = "wasm32", feature = "wasm-bindgen")))]
 type Instant = time::Instant;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(all(target_arch = "wasm32", feature = "wasm-bindgen")))]
 fn now() -> Instant {
     time::Instant::now()
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "wasm-bindgen"))]
 use instant;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "wasm-bindgen"))]
 type Instant = instant::Instant;
-#[cfg(target_arch = "wasm32")]
+#[cfg(all(target_arch = "wasm32", feature = "wasm-bindgen"))]
 fn now() -> Instant {
     instant::Instant::now()
 }

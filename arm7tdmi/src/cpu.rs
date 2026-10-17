@@ -332,7 +332,7 @@ impl<I: MemoryInterface> Arm7tdmiCore<I> {
         }
     }
 
-    pub(super) fn get_required_multipiler_array_cycles(&self, rs: u32) -> usize {
+    pub fn get_required_multipiler_array_cycles(&self, rs: u32) -> usize {
         if rs & 0xff == rs {
             1
         } else if rs & 0xffff == rs {
@@ -482,6 +482,24 @@ impl<I: MemoryInterface> Arm7tdmiCore<I> {
                 }
             }
         }
+    }
+
+    /// Static-recompilation support: the two-stage prefetch pipeline (`[decoded, prefetched]`).
+    #[inline(always)]
+    pub fn pipeline_mut(&mut self) -> &mut [u32; 2] {
+        &mut self.pipeline
+    }
+
+    /// Static-recompilation support: access type of the next instruction fetch.
+    #[inline(always)]
+    pub fn next_fetch_access(&self) -> MemoryAccess {
+        self.next_fetch_access
+    }
+
+    /// Static-recompilation support: set the access type of the next instruction fetch.
+    #[inline(always)]
+    pub fn set_next_fetch_access(&mut self, access: MemoryAccess) {
+        self.next_fetch_access = access;
     }
 
     /// Get's the address of the next instruction that is going to be executed

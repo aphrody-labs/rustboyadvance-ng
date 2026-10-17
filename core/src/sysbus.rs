@@ -161,6 +161,14 @@ pub struct SysBus {
 
 pub type SysBusPtr = WeakPointer<SysBus>;
 
+impl SysBus {
+    /// Current scheduler timestamp in cycles (static-recompilation budget checks).
+    #[inline(always)]
+    pub fn timestamp(&self) -> usize {
+        self.scheduler.timestamp()
+    }
+}
+
 impl SchedulerConnect for SysBus {
     fn connect_scheduler(&mut self, scheduler: SharedScheduler) {
         self.scheduler = scheduler.clone();

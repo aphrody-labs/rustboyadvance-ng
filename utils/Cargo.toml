@@ -11,5 +11,10 @@ log = "0.4.8"
 goblin = "0.10.1"
 
 
+[features]
+# Browser clock for FpsCounter on wasm32 (needs wasm-bindgen JS glue). Plain wasm32 embedders,
+# such as statically recompiled builds run by Bun, keep it off.
+wasm-bindgen = ["dep:instant"]
+
 [target.'cfg(target_arch="wasm32")'.dependencies]
-instant = { version = "0.1.2", features = ["wasm-bindgen"] }
+instant = { version = "0.1.2", features = ["wasm-bindgen"], optional = true }

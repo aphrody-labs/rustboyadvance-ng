@@ -16,7 +16,8 @@ num = "0.4.3"
 num-traits = "0.2"
 num-derive = "0.4"
 bit = "0.1.1"
-chrono = "0.4"
+# No `wasmbind`: plain wasm32 embedders have no JS glue; the browser platform enables it.
+chrono = { version = "0.4", default-features = false, features = ["clock", "std", "oldtime"] }
 colored = "3.0.0"
 ansi_term = "0.12.1"
 hexdump = "0.1.0"

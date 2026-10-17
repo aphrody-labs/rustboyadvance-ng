@@ -115,18 +115,18 @@ impl<I: MemoryInterface> MemoryInterface for Arm7tdmiCore<I> {
 /// Implementation of memory access helpers
 impl<I: MemoryInterface> Arm7tdmiCore<I> {
     #[inline]
-    pub(super) fn store_aligned_32(&mut self, addr: Addr, value: u32, access: MemoryAccess) {
+    pub fn store_aligned_32(&mut self, addr: Addr, value: u32, access: MemoryAccess) {
         self.store_32(addr & !0x3, value, access);
     }
 
     #[inline]
-    pub(super) fn store_aligned_16(&mut self, addr: Addr, value: u16, access: MemoryAccess) {
+    pub fn store_aligned_16(&mut self, addr: Addr, value: u16, access: MemoryAccess) {
         self.store_16(addr & !0x1, value, access);
     }
 
     /// Helper function for "ldr" instruction that handles misaligned addresses
     #[inline]
-    pub(super) fn ldr_word(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
+    pub fn ldr_word(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
         if addr & 0x3 != 0 {
             let rotation = (addr & 0x3) << 3;
             let value = self.load_32(addr & !0x3, access);
@@ -141,7 +141,7 @@ impl<I: MemoryInterface> Arm7tdmiCore<I> {
 
     /// Helper function for "ldrh" instruction that handles misaligned addresses
     #[inline]
-    pub(super) fn ldr_half(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
+    pub fn ldr_half(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
         if addr & 0x1 != 0 {
             let rotation = (addr & 0x1) << 3;
             let value = self.load_16(addr & !0x1, access);
@@ -156,7 +156,7 @@ impl<I: MemoryInterface> Arm7tdmiCore<I> {
 
     /// Helper function for "ldrsh" instruction that handles misaligned addresses
     #[inline]
-    pub(super) fn ldr_sign_half(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
+    pub fn ldr_sign_half(&mut self, addr: Addr, access: MemoryAccess) -> u32 {
         if addr & 0x1 != 0 {
             self.load_8(addr, access) as i8 as i32 as u32
         } else {
